@@ -6,6 +6,7 @@ def load_model():
     return joblib.load("app/model/model.joblib")
 
 def make_prediction(model, request: PredictionRequest) -> float:
-    data = np.array([[request.square_feet, request.bedrooms]])
-    prediction = model.predict(data)
-    return round(float(prediction[0]), 2)
+    # Access correct attributes based on current schema
+    input_array = np.array([[request.MedInc, request.AveRooms, request.HouseAge, request.AveOccup]])
+    prediction = model.predict(input_array)
+    return round(float(prediction[0]), 3)

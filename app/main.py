@@ -1,34 +1,49 @@
-# app/main.py
 from fastapi import FastAPI
 from app.schemas import PredictionRequest, PredictionResponse
 from app.model.predict import load_model, make_prediction
 
 app = FastAPI(
-    title="Housing Price Prediction API",
-    description="A lightweight ML prediction service to estimate housing prices based on square footage and number of bedrooms.",
-    version="0.1.0",
+    title="California Housing Price Prediction API",
+    description="""
+This API predicts median house prices in California (in units of $100,000) based on input features from the 
+[California Housing Dataset](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_california_housing.html).
+""",
+    version="1.0.0",
+    contact={
+        "name": "Dravid",
+        "url": "https://github.com/Anti-Invincinator",
+    }
 )
 
+# Load model at startup
 model = load_model()
 
-@app.get("/", summary="Health Check", description="Check if the API is running.")
+@app.get("/", summary="Health Check", description="Verify the API is running.")
 def root():
-    return {"message": "Housing Price Prediction API is running."}
+    return {"message": "California Housing Price Prediction API is up and running!"}
 
 @app.post(
     "/predict",
     response_model=PredictionResponse,
-    summary="Predict Housing Price",
+    summary="Predict California House Price",
     description="""
-Estimate the price of a house based on its square footage and number of bedrooms.
+Estimate the house price (in $100,000s) using the following inputs:
 
-**Input:**
-- `square_feet` (float): Total area of the house in square feet
-- `bedrooms` (int): Number of bedrooms
+- `MedInc`: Median income in block group
+- `AveRooms`: Average number of rooms per household
+- `HouseAge`: Median age of the house in years
+- `AveOccup`: Average occupancy per household
 
-**Output:**
-- `predicted_price` (float): Estimated price in USD
-""")
+Example:  
+```json
+{
+  "MedInc": 4.5,
+  "AveRooms": 6.2,
+  "HouseAge": 20,
+  "AveOccup": 2.5
+}
+"""
+)
 def predict(request: PredictionRequest):
     prediction = make_prediction(model, request)
     return {"predicted_price": prediction}

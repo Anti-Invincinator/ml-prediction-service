@@ -1,21 +1,31 @@
-import pandas as pd
+from sklearn.datasets import fetch_california_housing
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import pandas as pd
+from math import sqrt
 import joblib
 
-# Test Data Set
-data = {
-    'square_feet': [1500, 1800, 2400, 3000, 3500],
-    'bedrooms': [3, 4, 3, 5, 4],
-    'price': [300000, 350000, 400000, 500000, 550000]
-}
+# Data Set
+data = fetch_california_housing()
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = pd.Series(data.target, name="MedHouseVal")
 
-df = pd.DataFrame(data)
+# Extend the dataset with additional features later
+features = ["MedInc", "AveRooms", "HouseAge", "AveOccup"]
+X = X[features]
 
-X = df[['square_feet', 'bedrooms']]
-y = df['price']
+# Split and train
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 model = LinearRegression()
-model.fit(X, y)
+model.fit(X_train, y_train)
 
-joblib.dump(model, 'app/model/model.joblib')
+# Save model
+joblib.dump(model, "app/model/model.joblib")
 print("Model trained and saved.")
+
+# Evaluate
+y_pred = model.predict(X_test)
+rmse = sqrt(mean_squared_error(y_test, y_pred))
+print(f"RMSE: {rmse:.3f}")
